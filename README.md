@@ -1,16 +1,23 @@
 # 我的待办（单文件 ToDoList）
 
-一个零依赖的本地待办清单应用。所有 HTML / CSS / JavaScript 都内联在 `index.html` 里，没有第三方库、没有 CDN、没有构建步骤。
+一个零依赖的浏览器待办清单。所有 HTML / CSS / JavaScript 都内联在单个 `index.html` 里，没有第三方库、没有 CDN、没有构建步骤、没有后端。
 
-## 怎么打开
+它可以有两种用法：**直接双击本地文件**，或者**托管到任何静态网站服务上，得到一个谁都能打开的链接**。
 
-双击 `index.html`，或用 Chrome 打开：
+## 在线使用
 
-```
-"C:\Program Files\Google\Chrome\Application\chrome.exe" "E:\1\index.html"
-```
+把 `index.html` 上传到任意静态托管（GitHub Pages、Cloudflare Pages、Netlify 等），访问生成的网址即可。
 
-打开后即可使用，不需要装任何东西、不需要起服务。
+关于数据，有一点必须说清楚：
+
+- **数据存在每个访客自己的浏览器里**，不在服务器上。服务器只提供一个 HTML 文件，它不知道你是谁、也不知道你写了什么。
+- 因此**别人看不到你的清单，你也看不到别人的**，同一条链接对每个人都是一份独立的空列表。
+- 代价是数据不跟着链接走：换浏览器、换设备、清空浏览器数据，清单就没了。跨设备使用请用「导出」备份再在另一台设备「导入」。
+- 页面是公开的，但**里面没有任何服务端数据**，所以公开不会泄露任何人的任务内容。
+
+## 本地使用
+
+双击 `index.html` 即可，不需要装任何东西，也不需要启动服务。
 
 ## 功能
 
@@ -49,9 +56,8 @@
 
 - 只持久化 `theme` 和 `sort`；搜索关键词与筛选条件每次打开都会重置为「全部」。
 - 任务的先后顺序就是 `tasks` 数组的顺序，没有额外的排序字段。
-- 数据只存在**当前浏览器**里：换浏览器、换用户、清除浏览器数据都会丢。
-- 如果数据文件损坏，应用会把原始内容备份到 `todolist.v1.broken`，并以空列表启动，同时顶部给出提示。
-- 如果 localStorage 被禁用，应用会进入内存模式并常驻提示，此时改动不会保存，请用「导出」备份。
+- 如果数据损坏，应用会把原始内容备份到 `todolist.v1.broken`，并以空列表启动，同时顶部给出提示。
+- 如果 localStorage 被禁用（例如隐私模式下的限制），应用会进入内存模式并常驻提示，此时改动不会保存，请用「导出」备份。
 
 ## 备份与恢复
 
@@ -67,20 +73,33 @@
 用带参数的地址打开可以跑内置自测（覆盖字段清洗、增删改、四种排序、筛选、导入合并去重、导出结构、拖拽启用条件等）：
 
 ```
-"C:\Program Files\Google\Chrome\Application\chrome.exe" "E:\1\index.html?selftest=1"
+index.html?selftest=1
 ```
 
-页面顶部会列出每一项的结果，全部通过时标签页标题为 `SELFTEST PASS`，有失败项则为 `SELFTEST FAIL`。也可以在无头模式下断言：
+页面顶部会列出每一项的结果，全部通过时标签页标题为 `SELFTEST PASS`，有失败项则为 `SELFTEST FAIL`。用无头浏览器断言：
 
 ```
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --no-sandbox --disable-gpu `
-  --disable-software-rasterizer --disable-dev-shm-usage --no-first-run `
-  --user-data-dir="$env:TEMP\todo-verify" --dump-dom "file:///E:/1/index.html?selftest=1"
+chrome --headless=new --no-sandbox --disable-gpu --disable-software-rasterizer \
+  --disable-dev-shm-usage --dump-dom "file:///path/to/index.html?selftest=1"
 ```
+
+输出中应包含 `<div id="selftest-status">SELFTEST PASS</div>`。
 
 ## 已知限制
 
-- 只针对桌面 Chrome 设计，没有做移动端适配，也不是 PWA（不能离线安装、没有 Service Worker）。
+- 面向桌面浏览器设计，移动端能用但没有专门优化；不是 PWA，没有 Service Worker 和离线安装。
+- 没有账号、没有云同步，数据不跨设备。跨设备请用导出/导入。
 - 单条删除可以撤销，但「清空已完成」需要确认后不可撤销。
 - 截止日期只精确到天，按本地日期比较，不处理时区、不重复提醒。
-- 没有账号、云同步、桌面通知。
+- 因为纯静态，做不到「多人共享同一份清单」。那需要后端和数据库，是另一个项目。
+
+## 部署（自己发布）
+
+`index.html` 放在仓库根目录即可，无需构建步骤。
+
+- **GitHub Pages**：仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支选 `main`、目录选 `/ (root)`，保存后等一两分钟，链接是 `https://<用户名>.github.io/<仓库名>/`。
+- **Cloudflare Pages / Netlify**：把仓库连上去，构建命令留空，输出目录填 `/`。
+
+## 许可
+
+自己用，随便改。
